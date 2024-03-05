@@ -1,12 +1,13 @@
-FROM debian:latest
+FROM debian:bullseye
 
-WORKDIR /app
+RUN apt-get update ; apt-get install nginx -y ; apt-get install vim -y ; apt install curl -y
+RUN mkdir -p /etc/nginx/ssl ; apt install OpenSSL -y ; openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=FR/ST=AURA/L=Lyon/O=42/OU=42/CN=pgouasmi/UID=pgouasmi"
+RUN mkdir -p /var/run/nginx
 
-#USER pgouasmi
+COPY nginx.conf /etc/nginx/conf.d
 
-COPY test /app
-COPY script.sh /app
+RUN mkdir -p /run/nginx
 
-RUN apt update
+EXPOSE 443
 
-ENTRYPOINT ["/app/script.sh"]
+CMD [ "nginx", "-g", "daemon off;" ]
