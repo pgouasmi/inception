@@ -1,14 +1,20 @@
 FROM debian:bullseye
 
 RUN apt-get update -y ; apt-get upgrade -y
-RUN apt-get install mariadb-server -y
+RUN apt-get install mariadb-server mariadb-client -y
 RUN apt-get install systemctl -y
-RUN mkdir /run/mysqld
-RUN touch /run/mysqld/mysqld.sock
-RUN chown -R root /run/mysqld/mysqld.sock
+RUN apt-get install sudo -y
+
+RUN			mkdir -p /var/lib/mysql /var/run/mysqld
+RUN			chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
+RUN			chmod 777 /var/run/mysqld
 
 
-# RUN systemctl mysqld start
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
+RUN  chmod 644 /etc/mysql/mariadb.conf.d/50-server.cnf
+
+
+# RUN service mysql start
 
 # RUN mysql -e "CREATE DATABASE IF NOT EXISTS \`${SQL_DATABASE}\`;"
 # RUN mysql -e "CREATE USER IF NOT EXISTS \`${SQL_USER}\`@'localhost' IDENTIFIED BY '${SQL_PASSWORD}';"
@@ -17,6 +23,8 @@ RUN chown -R root /run/mysqld/mysqld.sock
 # RUN mysql -e "FLUSH PRIVILEGES;"
 # RUN mysqladmin -u root -p$SQL_ROOT_PASSWORD shutdown
 # RUN exec mysqld_safe
+
+# CMD ["mysqld", "--bind-address=0.0.0.0"]
 
 # CMD ["mariadb",  "-u", "root"]
 
