@@ -3,22 +3,22 @@ FROM debian:bullseye
 RUN apt-get update -y ; apt-get upgrade -y
 RUN apt-get install mariadb-server -y
 RUN apt-get install systemctl -y
-
-RUN useradd -ms /bin/bash user
-
-RUN rm -rf /var/lib/mysql && rm -rf /var/lib/mysqld
-
-RUN mkdir /var/lib/mysql && mkdir /var/lib/mysqld && mkdir /run/mysqld
-
-RUN chmod 777 /var/lib/mysql && chmod 777 /var/lib/mysqld && chmod 777 /run/mysqld
-# RUN apt install mysql-server
+RUN mkdir /run/mysqld
+RUN touch /run/mysqld/mysqld.sock
+RUN chown -R root /run/mysqld/mysqld.sock
 
 
-EXPOSE 3306
+# RUN systemctl mysqld start
 
-COPY conf/50-server.cnf	/etc/mysql/mariadb.conf.d/50-server.cnf
+# RUN mysql -e "CREATE DATABASE IF NOT EXISTS \`${SQL_DATABASE}\`;"
+# RUN mysql -e "CREATE USER IF NOT EXISTS \`${SQL_USER}\`@'localhost' IDENTIFIED BY '${SQL_PASSWORD}';"
+# RUN mysql -e "GRANT ALL PRIVILEGES ON \`${SQL_DATABASE}\`.* TO \`${SQL_USER}\`@'%' IDENTIFIED BY '${SQL_PASSWORD}';"
+# RUN mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${SQL_ROOT_PASSWORD}';"
+# RUN mysql -e "FLUSH PRIVILEGES;"
+# RUN mysqladmin -u root -p$SQL_ROOT_PASSWORD shutdown
+# RUN exec mysqld_safe
 
-RUN mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+# CMD ["mariadb",  "-u", "root"]
 
 
 
@@ -29,7 +29,7 @@ RUN mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 
 
 
-CMD ["/usr/bin/mysqld_safe"]
+# CMD ["mariadbd"]
 
 # RUN mysqld -u root -p
 
