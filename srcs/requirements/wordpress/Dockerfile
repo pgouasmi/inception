@@ -1,5 +1,10 @@
 FROM debian:bullseye
 
+ARG         SQL_DATABASE
+ARG         SQL_USER
+ARG         SQL_PASSWORD
+ARG         SQL_ROOT_PASSWORD
+
 RUN apt update -y
 RUN apt upgrade -y
 
@@ -26,12 +31,20 @@ RUN mv wp-cli.phar /usr/local/bin/wp
 
 COPY conf/wp_config.php /var/www/wordpress
 
-RUN sleep 5
+RUN rm -rf /tmp/config.sh
 
-RUN wp config create --allow-root --dbname=$SQL_DATABASE --dbuser=$SQL_USER --dbpass=$SQL_PASSWORD --dbhost=mariadb:3306 --path='/var/www/wordpress'
-RUN mkdir /run/php
+COPY conf/config.sh /tmp/
 
-RUN /usr/sbin/php-fpm7.3 -F
+# # RUN mkdir /run/php
+
+# ENTRYPOINT ["/bin/bash", "/tmp/config.sh"]
+
+# RUN sleep 5
+
+# RUN wp config create --allow-root --dbname=$SQL_DATABASE --dbuser=$SQL_USER --dbpass=$SQL_PASSWORD --dbhost=mariadb:3306 --path='/var/www/wordpress'
+# RUN mkdir /run/php
+
+# RUN /usr/sbin/php-fpm7.3 -F
 
 
 
