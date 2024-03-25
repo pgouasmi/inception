@@ -6,43 +6,67 @@ ARG         SQL_PASSWORD
 ARG         SQL_ROOT_PASSWORD
 
 RUN apt-get update -y ; apt-get upgrade -y
-RUN apt-get install mariadb-server mariadb-client -y
-RUN apt-get install systemctl -y
-RUN apt-get install sudo -y
+RUN apt-get install mariadb-server -y
 
-RUN	mkdir -p /var/lib/mysql /var/run/mysqld
-RUN	chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
-RUN	chmod 777 /var/run/mysqld
+# Copy the MariaDB configuration file and dump.sql file
+COPY        ./conf/mariadb.cnf /etc/mysql/mariadb.conf.d/
+RUN         chmod 644 /etc/mysql/mariadb.conf.d/mariadb.cnf
+# COPY        ./conf/dump.sql /usr/local/bin/
+
+COPY        ./tools/init.sh /usr/local/bin/
+RUN         bash /usr/local/bin/init.sh
+
+# Expose port to the host
+EXPOSE      3306
+
+# Run MariaDB
+ENTRYPOINT  [ "mysqld_safe" ]
 
 
-COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
-RUN  chown -R root /etc/mysql/mariadb.conf.d/
-RUN  chmod 644 /etc/mysql/mariadb.conf.d/50-server.cnf
 
-RUN service mariadb start
+# RUN apt-get install systemctl -y
+# RUN apt-get install sudo -y
 
-# Create and import WordPress database
-RUN mariadb -u root -e "CREATE DATABASE IF NOT EXISTS $SQL_DATABASE;"
-RUN mariadb -u root -e "CREATE USER IF NOT EXISTS '$SQL_USER'@'%' IDENTIFIED BY '$SQL_PASSWORD';"
-RUN mariadb -u root -e "GRANT ALL PRIVILEGES ON $SQL_DATABASE.* TO '$SQL_USER'@'%';"
-RUN mariadb -u root -e "FLUSH PRIVILEGES;"
+# RUN	mkdir -p /var/lib/mysql /var/run/mysqld
+# RUN	chown -R mysql:mysql /var/lib/mysql /var/run/mysqld
+# RUN	chmod 777 /var/run/mysqld
 
-# Import database dump
-RUN mariadb -u root $MYSQL_DATABASE < /usr/local/bin/dump.sql
 
-RUN # Set password for root user
-RUN mariadb -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$SQL_ROOT_PASSWORD');"
-RUN mariadb -u root -e "FLUSH PRIVILEGES;"
+# COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+# RUN  chown -R root /etc/mysql/mariadb.conf.d/
+# RUN  chmod 644 /etc/mysql/mariadb.conf.d/50-server.cnf
 
-RUN # Allow root user to login from any host
-RUN mariadb -u root -p $SQL_ROOT_PASSWORD "GRANT ALL ON *.* TO 'root'@'localhost' IDENTIFIED BY '$SQL_ROOT_PASSWORD';"
-RUN mariadb -u root -p $SQL_ROOT_PASSWORD "FLUSH PRIVILEGES;"
+# RUN service mariadb start && mariadb -u root -e "CREATE DATABASE IF NOT EXISTS $SQL_DATABASE;" /
+#          && mariadb -u root -e  "CREATE USER IF NOT EXISTS '$SQL_USER'@'%' IDENTIFIED BY '$SQL_PASSWORD';" /
+#          && mariadb -u root -e  "GRANT ALL PRIVILEGES ON $SQL_DATABASE.* TO '$SQL_USER'@'%';" /
+#          && mariadb -u root -e  "FLUSH PRIVILEGES;"/
+#          && mariadb -u root -p $SQL_ROOT_PASSWORD "GRANT ALL ON *.* TO 'root'@'localhost' IDENTIFIED BY '$SQL_ROOT_PASSWORD';"
+#          && mariadb -u root -p $SQL_ROOT_PASSWORD "FLUSH PRIVILEGES;"
+#          && service mariadb stop
 
-RUN service mariadb stop
 
-EXPOSE 3306
+# # Create and import WordPress database
+# RUN mariadb -u root -e "CREATE DATABASE IF NOT EXISTS $SQL_DATABASE;"
+# RUN mariadb -u root -e "CREATE USER IF NOT EXISTS '$SQL_USER'@'%' IDENTIFIED BY '$SQL_PASSWORD';"
+# RUN mariadb -u root -e "GRANT ALL PRIVILEGES ON $SQL_DATABASE.* TO '$SQL_USER'@'%';"
+# RUN mariadb -u root -e "FLUSH PRIVILEGES;"
 
-ENTRYPOINT [ "mysqld_safe"]
+# # Import database dump
+# RUN mariadb -u root $MYSQL_DATABASE < /usr/local/bin/dump.sql
+
+# RUN # Set password for root user
+# RUN mariadb -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$SQL_ROOT_PASSWORD');"
+# RUN mariadb -u root -e "FLUSH PRIVILEGES;"
+
+# RUN # Allow root user to login from any host
+# RUN mariadb -u root -p $SQL_ROOT_PASSWORD "GRANT ALL ON *.* TO 'root'@'localhost' IDENTIFIED BY '$SQL_ROOT_PASSWORD';"
+# RUN mariadb -u root -p $SQL_ROOT_PASSWORD "FLUSH PRIVILEGES;"
+
+# RUN service mariadb stop
+
+# EXPOSE 3306
+
+# ENTRYPOINT [ "mysqld_safe"]
 
 
 
