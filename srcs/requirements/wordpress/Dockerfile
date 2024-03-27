@@ -29,20 +29,11 @@ RUN mkdir -p /var/run/php
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 
-# COPY conf/wp-config.php /var/www/wordpress/wp-config.php
-
 COPY conf/config.sh /tmp/
 
 EXPOSE 9000
 
-# ENTRYPOINT ["/bin/bash", "/tmp/config.sh"]
-
-# RUN sleep 5
-
-# RUN wp config create --allow-root --dbname=$SQL_DATABASE --dbuser=$SQL_USER --dbpass=$SQL_PASSWORD --dbhost=mariadb:3306 --path='/var/www/wordpress'
-# RUN mkdir /run/php
-
-# RUN /usr/sbin/php-fpm7.4 -F
+ENTRYPOINT ["/bin/bash", "/tmp/config.sh"]
 
 
 

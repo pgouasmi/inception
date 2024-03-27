@@ -1,5 +1,18 @@
 version: '3'
 
+
+# Volumes
+volumes:
+  mariadb:
+    name: mariadb
+    external: true
+  wordpress:
+    name: wordpress
+    external: true
+  static:
+    name: static
+    external: true
+
 services:
   mariadb:
     container_name: mariadb
