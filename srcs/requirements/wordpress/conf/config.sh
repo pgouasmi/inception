@@ -1,22 +1,16 @@
 #!/bin/bash
 
-wp config create	--allow-root \
-					--dbname=$SQL_DATABASE \
-					--dbuser=$SQL_USER \
-					--dbpass=$SQL_PASSWORD \
-					--dbhost=mariadb:3306 --path='/var/www/wordpress'
+mv var/www/wordpress/* /var/www/html/
 
-wp core install --url=pgouasmi.42.fr --title=Inception --admin_user=$SQL_USER --admin_email=$ADMINMAIL --prompt=admin_password $SQL_PASSWORD
+mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+echo mv ok
+wp config set DB_NAME $MYSQL_DATABASE --allow-root --path=/var/www/html/
+echo "1 ok"
+wp config set DB_USER $MYSQL_USER --allow-root --path=/var/www/html/
+echo "2 ok"
+wp config set DB_PASSWORD $MYSQL_PASSWORD --allow-root --path=/var/www/html/
+echo "3 ok"
+wp config set DB_HOST mariadb --allow-root --path=/var/www/html/
+echo "4 ok"
 
-
-if [ -f /tmp/config.sh ] ; then
-    rm /tmp/config.sh
-fi
-
-# if [ -f run/php ] ; then
-   
-# else
-#      mkdir /run/php
-# fi
-
-# ./usr/bin/php-fpm7.4 -F
+./usr/sbin/php-fpm7.4 -F

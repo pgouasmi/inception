@@ -6,7 +6,7 @@ ARG         SQL_PASSWORD
 ARG         SQL_ROOT_PASSWORD
 
 RUN apt-get update -y ; apt-get upgrade -y
-RUN apt-get install mariadb-server -y
+RUN apt-get install mariadb-server -y --fix-missing
 
 # Copy the MariaDB configuration file and dump.sql file
 COPY        ./conf/mariadb.cnf /etc/mysql/mariadb.conf.d/

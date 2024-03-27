@@ -14,7 +14,7 @@ RUN apt -y install wget
 RUN apt install wordpress -y
 RUN apt install php -y
 RUN apt install php-fpm -y
-RUN apt install php-mysql -y
+RUN apt install -y php-mysql
 
 RUN wget https://fr.wordpress.org/wordpress-6.4.3-fr_FR.tar.gz -P /var/www
 
@@ -29,13 +29,11 @@ RUN mkdir -p /var/run/php
 RUN chmod +x wp-cli.phar
 RUN mv wp-cli.phar /usr/local/bin/wp
 
-COPY conf/wp_config.php /var/www/wordpress
-
-RUN rm -rf /tmp/config.sh
+# COPY conf/wp-config.php /var/www/wordpress/wp-config.php
 
 COPY conf/config.sh /tmp/
 
-# # RUN mkdir /run/php
+EXPOSE 9000
 
 # ENTRYPOINT ["/bin/bash", "/tmp/config.sh"]
 
@@ -44,7 +42,7 @@ COPY conf/config.sh /tmp/
 # RUN wp config create --allow-root --dbname=$SQL_DATABASE --dbuser=$SQL_USER --dbpass=$SQL_PASSWORD --dbhost=mariadb:3306 --path='/var/www/wordpress'
 # RUN mkdir /run/php
 
-# RUN /usr/sbin/php-fpm7.3 -F
+# RUN /usr/sbin/php-fpm7.4 -F
 
 
 
