@@ -3,7 +3,7 @@ COMPOSE_PATH="srcs/docker-compose.yml"
 
 all:
 	@mkdir -p $(VOLUME_DATA)/wordpress $(VOLUME_DATA)/mariadb
-	@docker compose -f $(COMPOSE_PATH) up --build -d
+	@docker compose -f $(COMPOSE_PATH) up --build
 
 down:
 	@docker compose -f $(COMPOSE_PATH) down
