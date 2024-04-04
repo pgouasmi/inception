@@ -1,15 +1,22 @@
 FROM debian:bullseye
 
-RUN apt-get update ; apt-get install nginx -y ; apt-get install curl -y
-RUN mkdir -p /etc/nginx/ssl ; apt install OpenSSL -y ; openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=FR/ST=AURA/L=Lyon/O=42/OU=42/CN=pgouasmi/UID=pgouasmi"
-RUN mkdir -p /var/run/nginx
-# RUN apt install systemctl -y
+RUN apt update  \
+    && apt install -y nginx  \
+    && apt install openssl  \
+    && mkdir -p /etc/nginx/ssl \
+    && apt clean  \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY nginx.conf /etc/nginx/conf.d
+COPY ./conf/nginx.conf /etc/nginx/conf.d/mynginx.conf
 
-RUN mkdir -p /run/nginx
+# ssl certificate creation
+RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key \
+    -subj "/C=FR/ST=AURA/L=Lyon/O=42/OU=42/CN=pgouasmi.42.fr/UID=pgouasmi"
 
-RUN chmod 755 /var/www/html
-RUN chown -R www-data:www-data /var/www/html
 
-ENTRYPOINT [ "nginx", "-g", "daemon off;" ]
+
+# RUN		mkdir -p /var/run/nginx
+
+
+
+CMD [ "nginx", "-g", "daemon off;" ]

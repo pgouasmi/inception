@@ -1,24 +1,22 @@
 FROM debian:bullseye
 
-ARG         SQL_DATABASE
-ARG         SQL_USER
-ARG         SQL_PASSWORD
-ARG         SQL_ROOT_PASSWORD
+ARG DATABASE_ROOT_PASSWORD
+ARG WORDPRESS_DATABASE
+ARG WORDPRESS_DATABASE_USER
+ARG WORDPRESS_DATABASE_USER_PASSWORD
 
-RUN apt-get update -y ; apt-get upgrade -y
-RUN apt-get install mariadb-server -y --fix-missing
+RUN apt-get update \
+    && apt-get install -y mariadb-server \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the MariaDB configuration file and dump.sql file
-COPY        ./conf/mariadb.cnf /etc/mysql/mariadb.conf.d/
-RUN         chmod 644 /etc/mysql/mariadb.conf.d/mariadb.cnf
-# COPY        ./conf/dump.sql /usr/local/bin/
+# initial mariadb config /!\ enabling root
+RUN service mariadb start \
+    && mariadb -u root \
+    -e "CREATE DATABASE IF NOT EXISTS ${WORDPRESS_DATABASE};" \
+    -e "CREATE USER IF NOT EXISTS '${WORDPRESS_DATABASE_USER}' IDENTIFIED BY '${WORDPRESS_DATABASE_USER_PASSWORD}';" \
+    -e "GRANT ALL PRIVILEGES ON ${WORDPRESS_DATABASE}.* TO '${WORDPRESS_DATABASE_USER}';" \
+    -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '${DATABASE_ROOT_PASSWORD}';" \
+    -e "FLUSH PRIVILEGES;"
 
-COPY        ./tools/init.sh /usr/local/bin/
-RUN         bash /usr/local/bin/init.sh
-
-# Expose port to the host
-EXPOSE      3306
-
-# Run MariaDB
-ENTRYPOINT  [ "mysqld_safe" ]
-
+ENTRYPOINT [ "mariadbd", "--bind-address=0.0.0.0"]
